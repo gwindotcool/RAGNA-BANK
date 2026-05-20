@@ -2,6 +2,7 @@ const loginService = require('../services/auth/loginService');
 
 exports.login = async (req, res) => {
     try {
+        console.log(req,res)
         const result = await loginService(req.body);
 
         return res.status(200).json({
