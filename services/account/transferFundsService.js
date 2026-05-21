@@ -81,29 +81,36 @@ exports.transferFundsService = async ({
         // 7. Emails (outside transaction)
         await Promise.all([
             sendEmail({
-                to: sender?.user?.email,
+                to: sender.user.email,
                 subject: `Debit Alert - ₦${amount.toLocaleString()}`,
+                title: "Debit Alert",
+                type: "debit",
                 message: `
 Hello ${sender.accountName},
 
-₦${amount.toLocaleString()} has been debited.
+₦${amount.toLocaleString()} has been debited from your account.
 
+Recipient: ${receiver.accountName}
 
 Reference: ${response.reference}
-`
-            }),
 
+Thank you for banking with RAGNA BANK.
+`}),
             sendEmail({
-                to: receiver?.user?.email,
+                to: receiver.user.email,
                 subject: `Credit Alert - ₦${amount.toLocaleString()}`,
+                title: "Credit Alert",
+                type: "credit",
                 message: `
 Hello ${receiver.accountName},
 
-₦${amount.toLocaleString()} has been credited.
+₦${amount.toLocaleString()} has been credited to your account.
 
 Sender: ${sender.accountName}
 
 Reference: ${response.reference}
+
+Thank you for banking with RAGNA BANK.
 `
             })
         ]);
