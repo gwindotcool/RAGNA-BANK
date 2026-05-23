@@ -8,9 +8,13 @@ const accountRoute = require('./routes/accountRoute')
 const transferRoute = require('./routes/transfer.routes')
 const authRoute = require('./routes/authRoute')
 
+const swaggerUi = require("swagger-ui-express");
+const swaggerSpec = require("./config/swagger");
+
 
 app.use(express.json());
 
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 app.get("/", (req, res) => {
     res.status(200).json({
