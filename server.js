@@ -12,6 +12,15 @@ const authRoute = require('./routes/authRoute')
 app.use(express.json());
 
 
+app.get("/", (req, res) => {
+    res.status(200).json({
+        success: true,
+        service: "Ragna Bank API",
+        status: "running",
+        time: new Date().toISOString()
+    });
+});
+
 app.use("/api/users", userRoute);
 app.use("/api/accounts", accountRoute);
 app.use("/api/transfer", transferRoute);
