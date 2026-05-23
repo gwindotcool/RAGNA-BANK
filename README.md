@@ -1,198 +1,332 @@
-# 🏦 RAGNA BANK API
+# 🏦 Ragna Bank API
 
-A secure digital banking backend system built with **Node.js, Express, MongoDB, and external banking APIs**.  
-It supports account creation, fund transfers, transaction history, and automated email notifications.
+A secure and scalable banking backend API built with Node.js, Express, MongoDB, and JWT authentication. The API supports account management, fund transfers, transaction history, account statements, and email notifications for debit/credit transactions.
 
 ---
 
 ## 🚀 Features
 
-### 👤 User & Auth
-- User registration and login
-- JWT authentication middleware
-- Password hashing with bcrypt
-
-### 🏦 Account System
-- Create bank account linked to a user
-- External account creation integration (NIBSS API)
-- Account balance tracking
-- Name enquiry service
-
-### 💸 Transfers
-- Secure fund transfers between accounts
-- MongoDB transactions (atomic updates)
-- External transfer API integration
-- Balance validation (insufficient funds protection)
-
-### 📊 Transactions
-- Full transaction history
-- Filter by account number
-- Transaction reference tracking
-- Account statement with:
-    - Opening balance
-    - Closing balance
-    - Total credits
-    - Total debits
-
-### 📧 Notifications
-- Debit alert email to sender
-- Credit alert email to receiver
-- Gmail SMTP integration (Nodemailer)
+* 🔐 User Authentication (JWT)
+* 🔑 Secure Login System
+* 🔒 Password Hashing with bcrypt
+* 👤 User Registration
+* 🏦 Bank Account Creation
+* 💸 Fund Transfer Between Accounts
+* 📜 Transaction History
+* 📊 Account Statement Generation
+* 📩 Email Notifications (Debit/Credit Alerts)
+* 🧾 Transaction Reference Tracking
+* ⚡ MongoDB Transactions & Sessions
+* 🛡️ Error Handling
 
 ---
 
-## 🧱 Tech Stack
+## 🛠️ Tech Stack
 
-- Node.js
-- Express.js
-- MongoDB + Mongoose
-- JWT (Authentication)
-- bcrypt (Password hashing)
-- Nodemailer (Email service)
-- Axios (External API requests)
-- NIBSS-style payment simulation API
+### Backend
+
+* Node.js
+* Express.js
+
+### Database
+
+* MongoDB
+* Mongoose
+
+### Authentication & Security
+
+* JWT (JSON Web Token)
+* bcrypt
+
+### Notifications
+
+* Nodemailer
+
+### Environment Variables
+
+* dotenv
 
 ---
 
-## 📁 Project Structure
+## 📂 Project Structure
 
+```txt
+BANK-API/
+│── src/
+│   │── config/
+│   │   ├── db.js
+│   │
+│   │── controllers/
+│   │   ├── authController.js
+│   │   ├── accountController.js
+│   │   └── transferController.js
+│   │
+│   │── services/
+│   │   │── auth/
+│   │   │   ├── loginService.js
+│   │   │   └── registerService.js
+│   │   │
+│   │   │── account/
+│   │   │   ├── transferFundsService.js
+│   │   │   ├── getAccountStatementService.js
+│   │   │   └── getTransactionsService.js
+│   │   │
+│   │   └── notification/
+│   │       └── sendMail.js
+│   │
+│   │── models/
+│   │   ├── User.js
+│   │   ├── Account.js
+│   │   └── TransactionHistory.js
+│   │
+│   │── routes/
+│   │   ├── authRoutes.js
+│   │   ├── accountRoutes.js
+│   │   └── transferRoutes.js
+│   │
+│   │── middlewares/
+│   │   └── authMiddleware.js
+│   │
+│   │── app.js
+│
+│── .env
+│── package.json
+│── server.js
+│── README.md
+```
 
+---
 
-controllers/
-authController.js
-transferController.js
-accountController.js
-services/
-account/
-transferFundsService.js
-transfer.js
-getBalance.js
-nameEnquiry.js
-auth/
-loginService.js
-notification/
-sendMail.js
-models/
-User.js
-Account.js
-TransactionHistory.js
-routes/
-authRoute.js
-transferRoute.js
-accountRoute.js
-middleware/
-authMiddleware.js
-server.js
----## ⚙️ Installation### 1. Clone repository```bashgit clone https://github.com/your-username/ragna-bank.gitcd ragna-bank
+## ⚙️ Installation
 
-Install dependencies
-   npm install
+Clone the repository:
 
-Create .env file
-   PORT=3000MONGO_URI=your_mongodb_connection_stringJWT_SECRET=your_jwt_secretJWT_EXPIRES=1dNIBSS_BASE_URL=your_external_api_urlNIBSS_EMAIL=your_gmail@gmail.comNIBSS_PASS=your_gmail_app_password
+```bash
+git clone https://github.com/YOUR_USERNAME/YOUR_REPOSITORY.git
+```
 
-Run the server
-   npm run dev
-   Server runs on:
-   http://localhost:3000
+Move into the project folder:
 
-🔐 Authentication Flow
-Login
+```bash
+cd YOUR_REPOSITORY
+```
+
+Install dependencies:
+
+```bash
+npm install
+```
+
+---
+
+## 🔐 Environment Variables
+
+Create a `.env` file in the root directory and add:
+
+```env
+PORT=3000
+
+MONGO_URI=your_mongodb_connection
+
+JWT_SECRET=your_secret_key
+JWT_EXPIRES=7d
+
+NIBSS_EMAIL=your_email@gmail.com
+NIBSS_PASS=your_app_password
+EMAIL_USER=your_email@gmail.com
+```
+
+---
+
+## ▶️ Running the Server
+
+Development mode:
+
+```bash
+npm run dev
+```
+
+Production:
+
+```bash
+npm start
+```
+
+Server runs on:
+
+```txt
+http://localhost:3000
+```
+
+---
+
+## 📌 API Endpoints
+
+### Authentication
+
+#### Register User
+
+```http
+POST /api/auth/register
+```
+
+Request:
+
+```json
+{
+  "name": "John Doe",
+  "email": "john@example.com",
+  "password": "password123"
+}
+```
+
+---
+
+#### Login User
+
+```http
 POST /api/auth/login
-Request Body
-{  "email": "user@example.com",  "password": "123456"}
-Response
-{  "success": true,  "data": {    "user": {      "id": "...",      "name": "...",      "email": "..."    },    "token": "JWT_TOKEN"  }}
+```
 
-🏦 Create Account
-POST /api/account
+Request:
 
-💸 Transfer Funds
+```json
+{
+  "email": "john@example.com",
+  "password": "password123"
+}
+```
+
+Response:
+
+```json
+{
+  "success": true,
+  "data": {
+    "user": {
+      "id": "12345",
+      "name": "John Doe",
+      "email": "john@example.com"
+    },
+    "token": "JWT_TOKEN"
+  }
+}
+```
+
+---
+
+### Transfers
+
+#### Transfer Funds
+
+```http
 POST /api/transfer
-Body
-{  "senderAccount": "6803622108",  "receiverAccount": "6809217232",  "amount": 1000}
+```
 
-📊 Transactions
-Get all transactions
-GET /api/transfer
-Get transaction by reference
-GET /api/transfer/transactions/reference/:reference
-Get account transactions
-GET /api/transfer/transactions/:accountNumber
-Get account statement
-GET /api/transfer/statement/account/:accountNumber
+Request:
 
-📧 Email Notifications
-Automatically sent on every transfer:
-Debit Email (Sender)
+```json
+{
+  "senderAccount": "6803622108",
+  "receiverAccount": "6809217232",
+  "amount": 1000
+}
+```
 
+Response:
 
-Amount deducted
+```json
+{
+  "success": true,
+  "message": "Transfer successful"
+}
+```
 
+---
 
-Recipient details
+### Transactions
 
+#### Get Account Transactions
 
-Transaction reference
+```http
+GET /api/account/transactions/:accountNumber
+```
 
+---
 
-Credit Email (Receiver)
+#### Get Account Statement
 
+```http
+GET /api/account/statement/:accountNumber
+```
 
-Amount received
+---
 
+#### Get Transfer By Reference
 
-Sender details
+```http
+GET /api/transfer/:reference
+```
 
+---
 
-Transaction reference
+## 🔑 Authentication
 
+Protected routes require a JWT token.
 
+Add token in headers:
 
-⚠️ Error Handling
-Standard API error response:
-{  "message": "Error description"}
+```http
+Authorization: Bearer YOUR_TOKEN
+```
 
-🧠 Key Architecture Decisions
+---
 
+## 📩 Email Notifications
 
-Services handle business logic (not controllers)
+Users receive email notifications for:
 
+* Debit alerts
+* Credit alerts
+* Transfer references
 
-Controllers only handle HTTP requests/responses
+---
 
+## 🧪 Testing
 
-MongoDB transactions ensure safe transfers
+Use:
 
+* Postman
+* Thunder Client
 
-External transfer API decoupled from internal logic
+to test endpoints.
 
+---
 
-Email notifications run after DB commit
+## 🚧 Future Improvements
 
+* OTP Verification
+* Role-Based Access Control
+* Admin Dashboard
+* Transaction Reversal
+* Scheduled Transfers
+* Account Freeze Feature
+* Audit Logging
+* Rate Limiting
+* Swagger API Documentation
 
+---
 
-🚧 Known Improvements (Next Phase)
+## 👨‍💻 Author
 
+Built by **Ukpabi Godwin**
 
-OTP verification for transfers
+Backend Engineer | Node.js | MongoDB | Express
 
+GitHub: https://github.com/gwindotcool
 
-Rate limiting & fraud detection
+---
 
+## 📄 License
 
-Admin dashboard
-
-
-Wallet vs bank separation
-
-
-Microservice breakdown (auth / payments / notifications)
-
-
-Webhooks for transaction status
-
-
-
-👨‍💻 Author
-Built by Ukpabi Godwin Michael 🚀
+This project is licensed under the MIT License.
