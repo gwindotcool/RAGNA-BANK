@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 const Account = require("../../models/Account");
 const Transaction = require("../../models/TransactionHistory");
 const sendEmail = require("../notification/sendMail");
-const transferService = require("./transfer");
+const transferService = require("../account/transfer");
 
 
 
@@ -83,11 +83,9 @@ exports.transferFundsService = async ({
             sendEmail({
                 to: sender.user.email,
                 subject: `Debit Alert - ₦${amount.toLocaleString()}`,
-                title: "Debit Alert",
+                customerName: sender.accountName,
                 type: "debit",
                 message: `
-Hello ${sender.accountName},
-
 ₦${amount.toLocaleString()} has been debited from your account.
 
 Recipient: ${receiver.accountName}
@@ -95,15 +93,14 @@ Recipient: ${receiver.accountName}
 Reference: ${response.reference}
 
 Thank you for banking with RAGNA BANK.
-`}),
+`
+}),
             sendEmail({
                 to: receiver.user.email,
                 subject: `Credit Alert - ₦${amount.toLocaleString()}`,
-                title: "Credit Alert",
+                customerName: receiver.accountName,
                 type: "credit",
                 message: `
-Hello ${receiver.accountName},
-
 ₦${amount.toLocaleString()} has been credited to your account.
 
 Sender: ${sender.accountName}

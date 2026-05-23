@@ -4,27 +4,20 @@ const transporter = nodemailer.createTransport({
     service: "gmail",
     auth: {
         user: process.env.NIBSS_EMAIL,
-        pass: process.env.NIBSS_PASS
-    }
+        pass: process.env.NIBSS_PASS,
+    },
 });
 
 module.exports = async ({
                             to,
                             subject,
                             message,
-                            title = "RAGNA BANK",
-                            type = "info" // success | debit | credit | warning
+                            customerName = "Customer",
+                            type = "notification" // debit | credit | notification
                         }) => {
 
-    const colors = {
-        success: "#16a34a",
-        debit: "#dc2626",
-        credit: "#2563eb",
-        warning: "#f59e0b",
-        info: "#4f46e5"
-    };
-
-    const accentColor = colors[type] || colors.info;
+    const isDebit = type === "debit";
+    const isCredit = type === "credit";
 
     const htmlTemplate = `
     <!DOCTYPE html>
@@ -34,105 +27,109 @@ module.exports = async ({
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     </head>
 
-    <body style="
-        margin:0;
-        padding:0;
-        background:#f4f7fb;
-        font-family:Arial, Helvetica, sans-serif;
-    ">
+    <body style="margin:0; padding:0; background:#f4f6f9; font-family:Arial, sans-serif;">
 
-        <table width="100%" cellpadding="0" cellspacing="0">
+        <table width="100%" cellpadding="0" cellspacing="0" style="background:#f4f6f9; padding:40px 0;">
             <tr>
-                <td align="center" style="padding:40px 20px;">
+                <td align="center">
 
-                    <table width="600" cellpadding="0" cellspacing="0" style="
-                        background:#ffffff;
-                        border-radius:20px;
-                        overflow:hidden;
-                        box-shadow:0 4px 20px rgba(0,0,0,0.08);
-                    ">
+                    <table width="600" cellpadding="0" cellspacing="0" style="background:#ffffff; border-radius:12px; overflow:hidden; box-shadow:0 2px 10px rgba(0,0,0,0.08);">
 
-                        <!-- HEADER -->
+                        <!-- Header -->
                         <tr>
-                            <td style="
-                                background:${accentColor};
-                                padding:30px;
-                                text-align:center;
-                                color:white;
-                            ">
-                                <h1 style="
-                                    margin:0;
-                                    font-size:28px;
-                                    letter-spacing:1px;
-                                ">
+                            <td style="background:#111827; padding:30px; text-align:center;">
+                                <h1 style="color:#ffffff; margin:0; font-size:28px;">
                                     RAGNA BANK
                                 </h1>
-
-                                <p style="
-                                    margin-top:10px;
-                                    font-size:15px;
-                                    opacity:0.9;
-                                ">
-                                    Secure Banking Experience
+                                <p style="color:#cbd5e1; margin-top:8px;">
+                                    Secure Banking Notification
                                 </p>
                             </td>
                         </tr>
 
-                        <!-- CONTENT -->
+                        <!-- Alert Banner -->
                         <tr>
-                            <td style="padding:40px 35px;">
-
-                                <h2 style="
-                                    margin-top:0;
-                                    color:#111827;
-                                    font-size:24px;
-                                ">
-                                    ${title}
-                                </h2>
+                            <td style="padding:30px;">
 
                                 <div style="
-                                    color:#374151;
-                                    line-height:1.8;
-                                    font-size:16px;
-                                    white-space: pre-line;
-                                ">
-                                    ${message}
-                                </div>
-
-                                <div style="
-                                    margin-top:30px;
+                                    background:${isDebit ? "#FEF2F2" : isCredit ? "#ECFDF5" : "#EFF6FF"};
+                                    border-left:5px solid ${isDebit ? "#DC2626" : isCredit ? "#16A34A" : "#2563EB"};
                                     padding:20px;
-                                    background:#f9fafb;
-                                    border-radius:12px;
-                                    border-left:5px solid ${accentColor};
+                                    border-radius:8px;
                                 ">
-                                    <strong>Security Notice:</strong>
-                                    Never share your password, OTP,
-                                    or PIN with anyone.
+
+                                    <h2 style="
+                                        margin:0;
+                                        color:${isDebit ? "#B91C1C" : isCredit ? "#15803D" : "#1D4ED8"};
+                                    ">
+                                        ${subject}
+                                    </h2>
+
+                                    <p style="margin-top:10px; color:#374151; line-height:1.7;">
+                                        Hello <strong>${customerName}</strong>,
+                                    </p>
+
+                                    <div style="
+                                        background:white;
+                                        padding:20px;
+                                        border-radius:8px;
+                                        border:1px solid #e5e7eb;
+                                        margin-top:20px;
+                                        line-height:1.8;
+                                        color:#374151;
+                                    ">
+                                        ${message.replace(/\n/g, "<br>")}
+                                    </div>
+
                                 </div>
 
                             </td>
                         </tr>
 
-                        <!-- FOOTER -->
+                        <!-- Security Notice -->
+                        <tr>
+                            <td style="padding:0 30px 30px;">
+                                <div style="
+                                    background:#F9FAFB;
+                                    border:1px solid #E5E7EB;
+                                    border-radius:8px;
+                                    padding:20px;
+                                ">
+                                    <strong style="color:#111827;">
+                                        Security Notice
+                                    </strong>
+
+                                    <p style="
+                                        color:#6B7280;
+                                        font-size:14px;
+                                        line-height:1.7;
+                                    ">
+                                        Please do not share your OTP, password,
+                                        or banking credentials with anyone.
+                                        RAGNA BANK will never request sensitive
+                                        information through email.
+                                    </p>
+                                </div>
+                            </td>
+                        </tr>
+
+                        <!-- Footer -->
                         <tr>
                             <td style="
                                 background:#111827;
-                                color:#d1d5db;
+                                padding:30px;
                                 text-align:center;
-                                padding:25px;
-                                font-size:14px;
                             ">
-                                <p style="margin:0;">
+                                <p style="color:#D1D5DB; margin:0;">
                                     © 2026 RAGNA BANK
                                 </p>
 
                                 <p style="
+                                    color:#9CA3AF;
+                                    font-size:13px;
                                     margin-top:10px;
-                                    font-size:12px;
-                                    color:#9ca3af;
                                 ">
-                                    This is an automated banking notification.
+                                    This is an automated message.
                                     Please do not reply to this email.
                                 </p>
                             </td>
@@ -153,6 +150,6 @@ module.exports = async ({
         to,
         subject,
         text: message,
-        html: htmlTemplate
+        html: htmlTemplate,
     });
 };
