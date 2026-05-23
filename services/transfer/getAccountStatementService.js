@@ -117,9 +117,9 @@ exports.getAccountStatementService =
             account.balance;
 
         const openingBalance =
-            closingBalance
-            - totalCredits
-            + totalDebits;
+            closingBalance +
+            totalCredits -
+            totalDebits
 
         return {
 
