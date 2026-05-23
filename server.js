@@ -14,7 +14,20 @@ const swaggerSpec = require("./config/swagger");
 
 app.use(express.json());
 
-app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+app.use(
+    "/api-docs",
+    swaggerUi.serve,
+    swaggerUi.setup(swaggerSpec, {
+        customSiteTitle: "Ragna Bank API Docs",
+        customCss: `
+      .topbar { background-color: #0f172a; }
+      .swagger-ui .topbar-wrapper img {
+        content: url('https://your-logo-url.png');
+        width: 120px;
+      }
+    `,
+    })
+);
 
 app.get("/", (req, res) => {
     res.status(200).json({

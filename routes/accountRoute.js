@@ -12,4 +12,6 @@ router.get('/', getAllAccounts);
 
 router.get('/balance/:accountNumber', authMiddleware, getBalanceController);
 
+
+
 module.exports = router;
