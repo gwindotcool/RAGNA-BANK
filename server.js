@@ -5,7 +5,7 @@ const app = express();
 
 const userRoute = require('./routes/userRoute')
 const accountRoute = require('./routes/accountRoute')
-const transferRoute = require('./routes/transferRoute')
+const transferRoute = require('./routes/transfer.routes')
 const authRoute = require('./routes/authRoute')
 
 

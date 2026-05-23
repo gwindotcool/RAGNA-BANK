@@ -2,46 +2,25 @@ const mongoose = require("mongoose");
 const Account = require("../../models/Account");
 const Transaction = require("../../models/TransactionHistory");
 const sendEmail = require("../notification/sendMail");
-const transferService = require("../account/transfer");
+const transferService = require("../account/transfer"); // external API logic
 
-
-
-exports.transferFundsService = async ({
-  senderAccount,
-   receiverAccount,
-    amount
-}) => {
+exports.transferFundsService = async ({ senderAccount, receiverAccount, amount }) => {
 
     const session = await mongoose.startSession();
     session.startTransaction();
 
     try {
-        // 1. Get accounts
-        const sender = await Account.findOne({
-            accountNumber: senderAccount
-        }).populate("user").session(session);
 
-        const receiver = await Account.findOne({
-            accountNumber: receiverAccount
-        }).populate("user").session(session);
-        console.log("SENDER FULL OBJECT:", JSON.stringify(sender || {}, null, 2));
-        console.log("RECEIVER FULL OBJECT:", JSON.stringify(receiver || {}, null, 2));
+        const sender = await Account.findOne({ accountNumber: senderAccount }).populate("user").session(session);
+        const receiver = await Account.findOne({ accountNumber: receiverAccount }).populate("user").session(session);
 
-// 1. check accounts FIRST
         if (!sender) throw new Error("Sender account not found");
         if (!receiver) throw new Error("Receiver account not found");
 
-// 2. check user population SAFELY
-        if (!sender?.user) throw new Error("Sender user not linked to account");
-        if (!receiver?.user) throw new Error("Receiver user not linked to account");
+        if (senderAccount === receiverAccount) throw new Error("Cannot transfer to same account");
 
-        if (senderAccount === receiverAccount)
-            throw new Error("Cannot transfer to same account");
+        if (sender.balance < amount) throw new Error("Insufficient balance");
 
-        if (sender.balance < amount)
-            throw new Error("Insufficient balance");
-
-        // 3. External transfer call
         const response = await transferService({
             from: senderAccount,
             to: receiverAccount,
@@ -52,63 +31,34 @@ exports.transferFundsService = async ({
             throw new Error("Transfer failed");
         }
 
-        // 4. Update balances
         sender.balance -= amount;
         receiver.balance += amount;
 
         await sender.save({ session });
         await receiver.save({ session });
 
-        // 5. Save transaction
         const transaction = await Transaction.create([{
             senderAccount,
             receiverAccount,
             amount,
             reference: response.reference,
-            status: response.status
+            status: response.status.toLowerCase()
         }], { session });
 
-        // 6. Commit DB
         await session.commitTransaction();
         session.endSession();
 
-        console.log("SENDER:", sender);
-        console.log("SENDER USER:", sender?.user);
-
-        console.log("RECEIVER:", receiver);
-        console.log("RECEIVER USER:", receiver?.user);
-
-        // 7. Emails (outside transaction)
+        // emails AFTER DB commit
         await Promise.all([
             sendEmail({
                 to: sender.user.email,
-                subject: `Debit Alert - ₦${amount.toLocaleString()}`,
-                customerName: sender.accountName,
-                type: "debit",
-                message: `
-₦${amount.toLocaleString()} has been debited from your account.
-
-Recipient: ${receiver.accountName}
-
-Reference: ${response.reference}
-
-Thank you for banking with RAGNA BANK.
-`
-}),
+                subject: `Debit Alert - ₦${amount}`,
+                message: `You sent ₦${amount}`
+            }),
             sendEmail({
                 to: receiver.user.email,
-                subject: `Credit Alert - ₦${amount.toLocaleString()}`,
-                customerName: receiver.accountName,
-                type: "credit",
-                message: `
-₦${amount.toLocaleString()} has been credited to your account.
-
-Sender: ${sender.accountName}
-
-Reference: ${response.reference}
-
-Thank you for banking with RAGNA BANK.
-`
+                subject: `Credit Alert - ₦${amount}`,
+                message: `You received ₦${amount}`
             })
         ]);
 
@@ -122,63 +72,8 @@ Thank you for banking with RAGNA BANK.
         };
 
     } catch (error) {
-        console.error(error.stack);
-
         await session.abortTransaction();
         session.endSession();
-
         throw error;
     }
 };
-
-exports.getAllTransferService =
-    async () => {
-
-        const transactions =
-            await Transaction.find()
-                .sort({ createdAt: -1 });
-
-        return {
-            success: true,
-            count: transactions.length,
-            data: transactions
-        };
-    };
-
-exports.getTransferService =
-    async (reference) => {
-
-        const transaction =
-            await Transaction.findOne({
-                reference
-            });
-
-        if (!transaction) {
-            throw new Error(
-                "Transaction not found"
-            );
-        }
-
-        return {
-            success: true,
-            data: {
-                transactionId:
-                transaction.reference,
-
-                senderAccount:
-                transaction.senderAccount,
-
-                receiverAccount:
-                transaction.receiverAccount,
-
-                amount:
-                transaction.amount,
-
-                status:
-                transaction.status,
-
-                createdAt:
-                transaction.createdAt
-            }
-        };
-    };
