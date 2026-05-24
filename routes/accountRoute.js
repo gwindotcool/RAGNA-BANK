@@ -12,6 +12,19 @@ router.get('/', getAllAccounts);
 
 router.get('/balance/:accountNumber', authMiddleware, getBalanceController);
 
-
+/**
+ * @swagger
+ * /api/auth/login:
+ *   post:
+ *     summary: Login user
+ *     tags: ["Auth"]
+ *     responses:
+ *       400:
+ *         description: Bad request
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/schemas/ErrorResponse"
+ */
 
 module.exports = router;

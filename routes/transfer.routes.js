@@ -3,6 +3,7 @@ const router = express.Router();
 const authMiddleware = require('../middleware/authMiddleware');
 
 const {transferFunds,getAllTransfer,getTransfer, getAccountTransactions, getAccountStatement} = require('../controllers/transferController');
+const validateTransfer = require("../middleware/validateTransfer");
 
 
 router.post("/",authMiddleware,transferFunds);
@@ -39,7 +40,7 @@ router.get('/statement/account/:accountNumber', getAccountStatement );
  *       200:
  *         description: Transfer successful
  */
-router.post("/", transferFunds);
+router.post("/",validateTransfer, transferFunds);
 
 /**
  * @swagger
@@ -61,5 +62,23 @@ router.post("/", transferFunds);
  *         description: Account statement fetched
  */
 
+
+/**
+ * @swagger
+ * tags:
+ *   name: Transactions
+ *   description: Transaction history and records
+ */
+
+/**
+ * @swagger
+ * /api/transactions/{accountNumber}:
+ *   get:
+ *     summary: Get account transactions
+ *     tags: ["Transactions"]
+ */
+router.get("/:accountNumber", getAccountTransactions);
+
+module.exports = router;
 
 module.exports = router;

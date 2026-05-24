@@ -42,7 +42,7 @@ exports.transferFundsService = async ({ senderAccount, receiverAccount, amount }
             receiverAccount,
             amount,
             reference: response.reference,
-            status: response.status.toLowerCase()
+            status: response.status
         }], { session });
 
         await session.commitTransaction();
