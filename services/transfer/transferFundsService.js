@@ -53,12 +53,31 @@ exports.transferFundsService = async ({ senderAccount, receiverAccount, amount }
             sendEmail({
                 to: sender.user.email,
                 subject: `Debit Alert - ₦${amount}`,
-                message: `You sent ₦${amount}`
+                customerName: sender.accountName,
+                type: "debit",
+                message: `
+Debit Amount: ₦${amount}
+Recipient: ${receiver.accountName}
+Account Number: ${receiver.accountNumber}
+Reference: ${response.reference}
+
+Your current balance is ₦${sender.balance}
+        `
             }),
+
             sendEmail({
                 to: receiver.user.email,
                 subject: `Credit Alert - ₦${amount}`,
-                message: `You received ₦${amount}`
+                customerName: receiver.accountName,
+                type: "credit",
+                message: `
+Credit Amount: ₦${amount}
+Sender: ${sender.accountName}
+Account Number: ${sender.accountNumber}
+Reference: ${response.reference}
+
+Your current balance is ₦${receiver.balance}
+        `
             })
         ]);
 
